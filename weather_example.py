@@ -25,23 +25,33 @@ def iso_equation(Tm, t):
     return dTmdt
 
 
+def iso_equation_modified(Tout, t):
+    dToutdt = (F_ta*kdir(az, zen)*dni - c1 * (Tout + t_in-2*t_amb) -
+               c2 * (Tout + t_in - 2*t_amb)**2 - 2 * mdot*cp*(Tout - t_in)/area)*2/c5
+    return dToutdt
+
+
 def plot_temps():
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 3, 1)
-    df_all['t_out'].plot()
+    df_all_iso['t_out'].plot(label='ISO')
+    df_all_iso_mod['t_out'].plot(label='ISO mod')
+    plt.legend()
     plt.title('$T_{out}$')
     plt.ylabel("$(K)$")
     plt.xlabel("time (s)")
 
     plt.subplot(1, 3, 2)
-    df_all['t_in'].plot(label="t_in")
-    df_all['t_amb'].plot(label="t_amb")
+    df_all_iso['t_in'].plot(label="t_in")
+    df_all_iso['t_amb'].plot(label="t_amb")
     plt.legend()
     plt.ylabel("$(K)$")
     plt.xlabel("time (s)")
 
     plt.subplot(1, 3, 3)
-    df_all['delta_t'].plot()
+    df_all_iso['delta_t'].plot(label='ISO')
+    df_all_iso_mod['delta_t'].plot(label='ISO mod')
+    plt.legend()
     plt.title('$T_{out} - T_{in}$')
     plt.ylabel("$(K)$")
     plt.xlabel("time (s)")
@@ -53,24 +63,40 @@ def plot_temps():
 def plot_power_eff():
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 3, 1)
-    df_all['irr'].plot()
+    df_all_iso['irr'].plot(label='ISO')
     plt.title("DNI")
     plt.ylabel("$(W \cdot m^{-2})$")
     plt.xlabel("time (s)")
 
     plt.subplot(1, 3, 2)
-    df_all['qdot'].plot()
+    df_all_iso['qdot'].plot(label='ISO')
+    df_all_iso_mod['qdot'].plot(label='ISO mod')
+    plt.legend()
     plt.title("$\dot Q$")
     plt.ylabel("$(W)$")
     plt.xlabel("time (s)")
 
     plt.subplot(1, 3, 3)
-    df_all['eff'].plot()
+    df_all_iso['eff'].plot(label='ISO')
+    df_all_iso_mod['eff'].plot(label='ISO mod')
+    plt.legend()
     plt.title("Efficiency")
 
     plt.xlabel("time (s)")
     plt.tight_layout()
     plt.show()
+
+
+def calc_qdot(df):
+    df['qdot'] = mdot * cp * (df['t_out'] - df['t_in']) / area
+
+
+def calc_eff(df):
+    df['eff'] = df['qdot'] / df['irr']
+
+
+def calc_delta(df):
+    df['delta_t'] = df['t_out'] / df['t_in']
 
 
 df = pd.read_csv("weather-data/2016_weather_upat.dat", sep="\t",
@@ -82,21 +108,31 @@ df.reset_index(drop=True, inplace=True)
 
 df = df[150:155]  # select rows with DNI about 800 W
 
-df_list = []
+iso_list = []
+iso_mod_list = []
 for index, row in df.iterrows():
     zen, az, dni, t_amb = row.tolist()
     t = np.arange(0, final_time)
     tm = odeint(iso_equation, t_in, t)
     t_out = 2*tm - t_in
+    t_out_mod = odeint(iso_equation_modified, t_in, t)
     iso = pd.DataFrame(data={"time": t, "irr": dni, "t_in": t_in,
                              "t_amb": t_amb, "t_out": t_out.flatten()})
+    iso_mod = iso.copy()
+    iso_mod["t_out"] = t_out_mod
+    iso_list.append(iso)
+    iso_mod_list.append(iso_mod)
 
-    df_list.append(iso)
+df_all_iso = pd.concat(iso_list, ignore_index=True)
+df_all_iso_mod = pd.concat(iso_mod_list, ignore_index=True)
 
-df_all = pd.concat(df_list, ignore_index=True)
-df_all['qdot'] = mdot * cp * (df_all['t_out'] - df_all['t_in']) / area
-df_all['eff'] = df_all['qdot'] / df_all['irr']
-df_all['delta_t'] = df_all['t_out'] / df_all['t_in']
+calc_qdot(df_all_iso)
+calc_eff(df_all_iso)
+calc_delta(df_all_iso)
+
+calc_qdot(df_all_iso_mod)
+calc_eff(df_all_iso_mod)
+calc_delta(df_all_iso_mod)
 
 
 plot_temps()
