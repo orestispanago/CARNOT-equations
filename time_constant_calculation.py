@@ -19,8 +19,8 @@ t_amb = 300         # ambient temperature (K)
 t_in = 290          # water inlet temperature (K)
 cp = 4200           # water heat capacity (J/kg*K)
 idir_0 = 800        # initial solar radiation intensity (W/m2)
-trigger_time = 50   # time to trigger step down function (s)
-final_time = 80     # final simulation time (s)
+trigger_time = 40   # time to trigger step down function (s)
+final_time = 60     # final simulation time (s)
 
 
 def step_down(t, trigger_time):

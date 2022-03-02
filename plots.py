@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+
 
 def plot_temperatures(iso, iso_mod):
     iso["t_out"].plot()
@@ -7,19 +7,21 @@ def plot_temperatures(iso, iso_mod):
     iso["t_in"].plot(style="--")
     iso["t_amb"].plot(style="--")
     plt.legend()
-    plt.ylabel("$Temperature \ (\degree C)$")
+    plt.ylabel("$Temperature \ (K)$")
     plt.xlabel("time (s)")
     plt.show()
+
 
 def plot_deltas(iso, iso_mod):
     iso["delta_t"].plot(label="ISO")
     iso_mod["delta_t"].plot(label="ISO mod")
     plt.legend()
     plt.xlabel("time (s)")
-    plt.ylabel("$Temperature \ (\degree C)$")
+    plt.ylabel("(K)")
     plt.title("$T_{out} - T_{in}$")
     plt.show()
-    
+
+
 def plot_delta_fraction(iso_dec, iso_mod_dec, tc_iso, val_iso, tc_iso_mod, val_iso_mod):
     iso_dec["delta_t_frac"].plot(label="ISO")
     iso_mod_dec["delta_t_frac"].plot(label="ISO mod")
