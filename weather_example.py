@@ -27,7 +27,7 @@ def iso_equation(Tm, t):
 
 def iso_equation_modified(Tout, t):
     dToutdt = (F_ta*kdir(az, zen)*dni - c1 * (Tout + t_in-2*t_amb) -
-               c2 * (Tout + t_in - 2*t_amb)**2 - 2 * mdot*cp*(Tout - t_in)/area)*2/c5
+               c2 * (Tout + t_in - 2*t_amb)**2 -  mdot*cp*(Tout - t_in)/area)*2/c5
     return dToutdt
 
 
