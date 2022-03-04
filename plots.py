@@ -1,33 +1,49 @@
 import matplotlib.pyplot as plt
 
 
-def plot_temperatures(iso, iso_mod):
-    iso["t_out"].plot()
-    iso_mod["t_out"].plot(label="t_out mod")
-    iso["t_in"].plot(style="--")
-    iso["t_amb"].plot(style="--")
-    plt.legend()
-    plt.ylabel("$Temperature \ (K)$")
+def plot_temps(df):
+    plt.figure(figsize=(12, 4))
+    plt.subplot(1, 3, 1)
+    df['t_out'].plot()
+    plt.title('$T_{out}$')
+    plt.ylabel("$(K)$")
     plt.xlabel("time (s)")
+
+    plt.subplot(1, 3, 2)
+    df['t_in'].plot(label="$T_{in}$")
+    df['t_amb'].plot(label="$T_{amb}$")
+    plt.legend()
+    plt.ylabel("$(K)$")
+    plt.xlabel("time (s)")
+
+    plt.subplot(1, 3, 3)
+    df['delta_t'].plot()
+    plt.title('$T_{out} - T_{in}$')
+    plt.ylabel("$(K)$")
+    plt.xlabel("time (s)")
+
+    plt.tight_layout()
     plt.show()
 
 
-def plot_deltas(iso, iso_mod):
-    iso["delta_t"].plot(label="ISO")
-    iso_mod["delta_t"].plot(label="ISO mod")
-    plt.legend()
+def plot_power_eff(df):
+    plt.figure(figsize=(12, 4))
+    plt.subplot(1, 3, 1)
+    df['dni'].plot()
+    plt.title("DNI")
+    plt.ylabel("$(W \cdot m^{-2})$")
     plt.xlabel("time (s)")
-    plt.ylabel("(K)")
-    plt.title("$T_{out} - T_{in}$")
-    plt.show()
 
-
-def plot_delta_fraction(iso_dec, iso_mod_dec, tc_iso, val_iso, tc_iso_mod, val_iso_mod):
-    iso_dec["delta_t_frac"].plot(label="ISO")
-    iso_mod_dec["delta_t_frac"].plot(label="ISO mod")
-    plt.plot(tc_iso, val_iso, "o")
-    plt.plot(tc_iso_mod, val_iso_mod, "o")
+    plt.subplot(1, 3, 2)
+    df['qdot'].plot()
+    plt.title("$\dot Q$")
+    plt.ylabel("$(W)$")
     plt.xlabel("time (s)")
-    plt.title("$\Delta T / \Delta T_0$")
-    plt.legend()
+
+    plt.subplot(1, 3, 3)
+    df['eff'].plot(label='ISO')
+    plt.title("Efficiency")
+
+    plt.xlabel("time (s)")
+    plt.tight_layout()
     plt.show()

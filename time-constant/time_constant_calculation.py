@@ -1,10 +1,13 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.integrate import odeint
 
 from plots import plot_delta_fraction, plot_deltas, plot_temperatures
-from splines import kdir
+
+import sys
+sys.path.append('../')
+
+from lookup.iam import kdir
 
 # CARNOT parameters
 area = 1        # collector surface  (m2)
@@ -45,7 +48,7 @@ def iso_equation_modified(Tout, t):
 
 def calc_time_constant(df):
     """ Time (s) to decrease Tout-Tin to 1/e of its initial value """
-    time_constant = df[df['delta_t_frac'].lt(1/np.exp(1))].index[0]
+    time_constant = df[df['delta_t_frac'].lt(0.05)].index[0]
     value = df["delta_t_frac"].iloc[time_constant]
     return time_constant, value
 

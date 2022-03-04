@@ -1,4 +1,3 @@
-import numpy as np
 from scipy.interpolate import interp1d
 
 angles = [0, 10, 20, 30, 40, 50, 60, 70, 90]  # (degrees)

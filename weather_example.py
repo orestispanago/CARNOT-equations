@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.integrate import odeint
 
-from splines import kdir
+from lookup.iam import kdir
 
 # CARNOT parameters
 area = 1        # collector surface  (m2)
@@ -16,7 +16,7 @@ c5 = 675        # effective thermal capacity [J/(m²K)]
 mdot = 80 / 3600    # mass flow rate (L/h to kg/s for water density=1000 kg/m3)
 t_in = 280          # water inlet temperature (K)
 cp = 4200           # water heat capacity (J/kg*K)
-final_time = 60     # final simulation time (s)
+final_time = 30     # final simulation time (s)
 
 
 def iso_equation(Tm, t):
