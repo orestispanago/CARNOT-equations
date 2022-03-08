@@ -22,7 +22,7 @@ cp = 4200           # water heat capacity (J/kg*K)
 final_time = 20     # final simulation time (s)
 
 
-def iso_equation_modified(Tout, t):
+def iso_equation_modified(Tout, t, transv, long, dni, t_amb):
     dToutdt = (F_ta*kdir(transv, long)*dni - c1 * (Tout + t_in-2*t_amb) -
                c2 * (Tout + t_in - 2*t_amb)**2 - mdot*cp*(Tout - t_in)/area)*2/c5
     return dToutdt
@@ -53,12 +53,27 @@ df['t_in'] = t_in
 
 t = np.arange(0, final_time)
 
-t_out_list = []
-for index, row in tqdm(df.iterrows(), total=df.shape[0]):
-    long, transv, dni, t_amb, t_in = row.tolist()
-    t_out = odeint(iso_equation_modified, t_in, t)
-    t_out_list.append(t_out[-1][0])
-df["t_out"] = t_out_list
+""" iterrows version (about 30 minutes) """
+# t_out_list = []
+# for index, row in tqdm(df.iterrows(), total=df.shape[0]):
+#     long, transv, dni, t_amb, t_in = row.tolist()
+#     t_out = odeint(iso_equation_modified, t_in, t)
+#     t_out_list.append(t_out[-1][0])
+# df["t_out"] = t_out_list
+
+""" Vectorized """
+df_arr = df.to_numpy()
+zen = df_arr[:, 0]
+az = df_arr[:, 1]
+dni = df_arr[:, 2]
+t_amb = df_arr[:, 3]
+t_in = np.ones(len(df))*t_in
+
+tout_all = odeint(iso_equation_modified, t_in, t, args=(az, zen, dni, t_amb))
+
+t_out = tout_all[-1, :]
+
+df['t_out'] = t_out
 
 calc_qdot(df)
 calc_delta(df)
