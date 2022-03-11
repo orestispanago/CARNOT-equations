@@ -14,7 +14,7 @@ c5 = 675        # effective thermal capacity [J/(m²K)]
 
 # my parameters
 mdot = 80 / 3600    # mass flow rate (L/h to kg/s for water density=1000 kg/m3)
-t_in = 280          # water inlet temperature (K)
+t_in = 150+273          # water inlet temperature (K)
 cp = 4200           # water heat capacity (J/kg*K)
 final_time = 30     # final simulation time (s)
 

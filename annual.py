@@ -21,15 +21,20 @@ t_in = 280          # water inlet temperature (K)
 cp = 4200           # water heat capacity (J/kg*K)
 final_time = 20     # final simulation time (s)
 
+def iso_equation(Tm, t, transv, long, dni, t_amb):
+    dTmdt = (F_ta*kdir(transv, long)*dni - c1 * (Tm - t_amb) -
+             c2 * (Tm - t_amb)**2 - 2 * mdot*cp*(Tm - t_in)/area)/c5
+    return dTmdt
 
 def iso_equation_modified(Tout, t, transv, long, dni, t_amb):
-    dToutdt = (F_ta*kdir(transv, long)*dni - c1 * (Tout + t_in-2*t_amb) -
+    dToutdt = (F_ta*kdir(long, transv)*dni - c1 * (Tout + t_in-2*t_amb) -
                c2 * (Tout + t_in - 2*t_amb)**2 - mdot*cp*(Tout - t_in)/area)*2/c5
     return dToutdt
 
 
 def calc_qdot(df):
-    df['qdot'] = mdot * cp * (df['t_out'] - df['t_in']) / area
+    delta_t = df['t_out'] - df['t_in']
+    df['qdot'] = mdot*cp/area*np.where(delta_t<=0.7, 0, delta_t)
 
 
 def calc_eff(df):
@@ -48,6 +53,7 @@ df = df.loc[(df['zen'] < 90) & (df["T"] > -10)]
 df = df.rename(columns={"az": "transv", "zen": "long", "T": "t_amb"})
 df['transv'] = abs(df['transv'])
 df['transv'] = df['transv'].apply(lambda x: x if x < 90 else 180 - x)
+df['long'] = abs(df['long']-38)
 df['t_amb'] = df['t_amb'] + 273
 df['t_in'] = t_in
 
@@ -81,4 +87,5 @@ calc_eff(df)
 plot_temps(df)
 plot_power_eff(df)
 
+# df.to_csv('output_tilt38_iso.csv')
 # CHECK this: kwh = df['qdot']/60000

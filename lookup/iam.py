@@ -16,5 +16,5 @@ def kbl(angle_long):
     return kbL_spline(angle_long)
 
 
-def kdir(angle_long, angle_transv):
-    return kbl(angle_long)*kbt(angle_transv)
+def kdir(angle_transv, angle_long):
+    return kbt(angle_transv)*kbl(angle_long)
