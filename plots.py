@@ -72,7 +72,7 @@ def plot_kwh_timeseries(dfin, col='qdot', interval="D", ylabel="kWh", folder=Non
     plt.show()
 
 
-def plot_calendar_heatmap(dfin, col, freq="1min", cbar_label=None, units="",
+def plot_calendar_heatmap(dfin, col, freq="1min", cbar_title="cbar_title", units="",
                           title="Title",
                           folder="calendar-heatmaps"):
     plt.rc('font', size=BIGGER_SIZE)          # controls default text sizes
@@ -83,15 +83,23 @@ def plot_calendar_heatmap(dfin, col, freq="1min", cbar_label=None, units="",
     df = df.pivot("Time, UTC", "Date", col)
     fig, ax = plt.subplots(figsize=(30, 8))
     ax.set_title(title)
-    if not cbar_label:
-        cbar_label = col.replace("_", " ").title() + units
+
     ax = sns.heatmap(df, cmap="jet",  xticklabels=31, yticklabels=120)
     cbar = ax.collections[0].colorbar
-    cbar.set_label(cbar_label, labelpad=30)
+    # cbar.set_label(cbar_label, labelpad=30)
+    cbar.ax.set_title(cbar_title)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+
+    """ Y tick labels format HH:MM """
+    yticklabels = ax.get_yticklabels()
+    for lab in yticklabels:
+        lab.set_text(lab.get_text()[:-3])
+    ax.set_yticklabels(yticklabels)
+
     ax.set_xlabel("2016")
     ax.invert_yaxis()
     ax.tick_params(axis='y', which='major', pad=30)
+    plt.xticks(rotation=0)
     # plt.tight_layout()
     # plt.savefig(f"{folder}/{col}.png")
     plt.show()

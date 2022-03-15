@@ -75,5 +75,12 @@ plot_temps(df)
 plot_power_eff(df)
 
 plot_kwh_timeseries(df)
-plot_calendar_heatmap(df, 'qdot', title='$\dot Q$', cbar_label="$W \cdot m^{-2}$")
-plot_calendar_heatmap(df, 'eff', title='Efficiency', cbar_label=" ")
+
+plot_calendar_heatmap(df, 'az', title='Transversal incidence angle', cbar_title="$\\theta_T \ (\degree)$")
+plot_calendar_heatmap(df, 'zen', title='Longitudinal incidence angle', cbar_title="$\\theta_L \ (\degree)$")
+
+plot_calendar_heatmap(df, 'dni', title='DNI', cbar_title="$W \cdot m^{-2}$")
+plot_calendar_heatmap(df, 'kdir_idir', title='$K_{dir} \cdot DNI$', cbar_title="$W \cdot m^{-2}$")
+plot_calendar_heatmap(df, 'qdot', title='$\dot Q$', cbar_title="$W$")
+plot_calendar_heatmap(df, 'eff', title='Efficiency', cbar_title=" ")
+ 
