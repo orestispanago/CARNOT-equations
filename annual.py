@@ -1,10 +1,9 @@
 from lookup.iam import kdir
-from tqdm import tqdm
 import numpy as np
 from scipy.integrate import odeint
 import pandas as pd
 import sys
-from plots import plot_temps, plot_power_eff
+from plots import plot_temps, plot_power_eff, plot_kwh_timeseries, plot_calendar_heatmap
 
 sys.path.append('../')
 
@@ -17,75 +16,64 @@ c5 = 675        # effective thermal capacity [J/(m²K)]
 
 # my parameters
 mdot = 80 / 3600    # mass flow rate (L/h to kg/s for water density=1000 kg/m3)
-t_in = 280          # water inlet temperature (K)
+t_in_0 = 280          # water inlet temperature (K)
 cp = 4200           # water heat capacity (J/kg*K)
 final_time = 20     # final simulation time (s)
 
-def iso_equation(Tm, t, transv, long, dni, t_amb):
+
+def iso_equation(Tm, t, transv, long, dni, t_amb, t_in):
     dTmdt = (F_ta*kdir(transv, long)*dni - c1 * (Tm - t_amb) -
              c2 * (Tm - t_amb)**2 - 2 * mdot*cp*(Tm - t_in)/area)/c5
     return dTmdt
 
-def iso_equation_modified(Tout, t, transv, long, dni, t_amb):
+
+def iso_equation_modified(Tout, t, transv, long, dni, t_amb, t_in):
     dToutdt = (F_ta*kdir(long, transv)*dni - c1 * (Tout + t_in-2*t_amb) -
                c2 * (Tout + t_in - 2*t_amb)**2 - mdot*cp*(Tout - t_in)/area)*2/c5
     return dToutdt
 
 
+def iso_eq_mod_no_lookup(Tout, t, kdir_idir, t_amb, t_in):
+    dToutdt = (F_ta*kdir_idir - c1 * (Tout + t_in-2*t_amb) -
+               c2 * (Tout + t_in - 2*t_amb)**2 - mdot*cp*(Tout - t_in)/area)*2/c5
+    return dToutdt
+
+
 def calc_qdot(df):
-    delta_t = df['t_out'] - df['t_in']
-    df['qdot'] = mdot*cp/area*np.where(delta_t<=0.7, 0, delta_t)
+    df['delta_t'] = df['t_out'] - df['t_in']
+    df['qdot'] = mdot*cp/area*np.where(df['delta_t'] <= 1, 0, df['delta_t'])
 
 
 def calc_eff(df):
     df['eff'] = df['qdot'] / df['dni']
 
 
-def calc_delta(df):
-    df['delta_t'] = df['t_out'] - df['t_in']
+def calc_tout(df):
+    """ Solves ODE for each row in weather data file """
+    t = np.arange(0, final_time)
+    df['t_in'] = t_in_0
+    df_arr = df.to_numpy()
+    t_amb = df_arr[:, 4]
+    kdir_idir = df_arr[:, 5]
+    t_in = df_arr[:,6]
+    tout = odeint(iso_eq_mod_no_lookup, t_in, t, args=(kdir_idir, t_amb, t_in))
+    t_out = tout[-1, :]
+    df['t_out'] = t_out
 
 
-df = pd.read_csv("weather-data/2016_weather_upat.dat", sep="\t",
-                 usecols=["az", "zen", "T", "dni"])
-df = df.loc[(df['zen'] < 90) & (df["T"] > -10)]
+df = pd.read_csv('input/preproc_tilt38_kdir_idir_07_14.csv', index_col='time', 
+                 parse_dates=True)
 
-# df.reset_index(drop=True, inplace=True)
-df = df.rename(columns={"az": "transv", "zen": "long", "T": "t_amb"})
-df['transv'] = abs(df['transv'])
-df['transv'] = df['transv'].apply(lambda x: x if x < 90 else 180 - x)
-df['long'] = abs(df['long']-38)
-df['t_amb'] = df['t_amb'] + 273
-df['t_in'] = t_in
-
-t = np.arange(0, final_time)
-
-""" iterrows version (about 30 minutes) """
-# t_out_list = []
-# for index, row in tqdm(df.iterrows(), total=df.shape[0]):
-#     long, transv, dni, t_amb, t_in = row.tolist()
-#     t_out = odeint(iso_equation_modified, t_in, t)
-#     t_out_list.append(t_out[-1][0])
-# df["t_out"] = t_out_list
-
-""" Vectorized """
-df_arr = df.to_numpy()
-zen = df_arr[:, 0]
-az = df_arr[:, 1]
-dni = df_arr[:, 2]
-t_amb = df_arr[:, 3]
-t_in = np.ones(len(df))*t_in
-
-tout_all = odeint(iso_equation_modified, t_in, t, args=(az, zen, dni, t_amb))
-
-t_out = tout_all[-1, :]
-
-df['t_out'] = t_out
-
+calc_tout(df)
 calc_qdot(df)
-calc_delta(df)
 calc_eff(df)
+
+annual_energy_yield = df['qdot'].sum()/60000
+print(f"Annual energy yield: {annual_energy_yield:.2f} kWh")
+
 plot_temps(df)
 plot_power_eff(df)
 
-# df.to_csv('output_tilt38_iso.csv')
-# CHECK this: kwh = df['qdot']/60000
+plot_kwh_timeseries(df)
+plot_calendar_heatmap(df, 'qdot', title='$\dot Q$', cbar_label="$W \cdot m^{-2}$")
+plot_calendar_heatmap(df, 'eff', title='Efficiency', cbar_label=" ")
