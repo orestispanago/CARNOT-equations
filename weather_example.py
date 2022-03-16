@@ -99,7 +99,7 @@ def calc_delta(df):
     df['delta_t'] = df['t_out'] / df['t_in']
 
 
-df = pd.read_csv("weather-data/2016_weather_upat.dat", sep="\t",
+df = pd.read_csv("input/2016_weather_upat.dat", sep="\t",
                  usecols=["az", "zen", "T", "dni"], nrows=560)
 df = df.loc[(df['zen'] < 90) & (df["T"] > -10)]
 df['az'] = abs(df['az'])

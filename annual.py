@@ -3,6 +3,7 @@ import numpy as np
 from scipy.integrate import odeint
 import pandas as pd
 import sys
+import matplotlib.pyplot as plt
 from plots import plot_temps, plot_power_eff, plot_kwh_timeseries, plot_calendar_heatmap
 
 sys.path.append('../')
@@ -61,26 +62,17 @@ def calc_tout(df):
     df['t_out'] = t_out
 
 
-df = pd.read_csv('input/preproc_tilt38_kdir_idir_07_14.csv', index_col='time', 
-                 parse_dates=True)
 
-calc_tout(df)
-calc_qdot(df)
-calc_eff(df)
+# plot_temps(df)
+# plot_power_eff(df)
 
-annual_energy_yield = df['qdot'].sum()/60000
-print(f"Annual energy yield: {annual_energy_yield:.2f} kWh")
+# plot_kwh_timeseries(df)
 
-plot_temps(df)
-plot_power_eff(df)
+# # plot_calendar_heatmap(df, 'az', title='Transversal incidence angle', cbar_title="$\\theta_T \ (\degree)$")
+# # plot_calendar_heatmap(df, 'zen', title='Longitudinal incidence angle', cbar_title="$\\theta_L \ (\degree)$")
 
-plot_kwh_timeseries(df)
+# plot_calendar_heatmap(df, 'dni', title='$DNI$', cbar_title="$W \cdot m^{-2}$")
+# plot_calendar_heatmap(df, 'kdir_idir', title='$K_{dir} \cdot DNI$', cbar_title="$W \cdot m^{-2}$")
+# plot_calendar_heatmap(df, 'qdot', title='$\dot Q$', cbar_title="$W$")
+# plot_calendar_heatmap(df, 'eff', title='Efficiency', cbar_title=" ")
 
-plot_calendar_heatmap(df, 'az', title='Transversal incidence angle', cbar_title="$\\theta_T \ (\degree)$")
-plot_calendar_heatmap(df, 'zen', title='Longitudinal incidence angle', cbar_title="$\\theta_L \ (\degree)$")
-
-plot_calendar_heatmap(df, 'dni', title='DNI', cbar_title="$W \cdot m^{-2}$")
-plot_calendar_heatmap(df, 'kdir_idir', title='$K_{dir} \cdot DNI$', cbar_title="$W \cdot m^{-2}$")
-plot_calendar_heatmap(df, 'qdot', title='$\dot Q$', cbar_title="$W$")
-plot_calendar_heatmap(df, 'eff', title='Efficiency', cbar_title=" ")
- 

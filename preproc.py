@@ -23,4 +23,13 @@ df['t_amb'] = df['T'] + 273
 df['kdir_idir'] = kdir(transv=df['az'], long=df['zen'])*df['dni']
 
 
-df.to_csv("input/preproc_tilt38_kdir_idir_07_14.csv", index_label='time')
+# df.to_csv("input/preproc_tilt38_kdir_idir_07_14.csv", index_label='time')
+
+
+ 
+solstice = pd.read_csv('input/solstice_output.csv', index_col='time', parse_dates=True)
+solstice = solstice.resample('1min').mean()
+solstice = solstice.between_time("07:00", "14:00")
+absorber_dimensions = 0.25*0.25
+df['kdir_idir'] = solstice['absorbed_flux']
+df.to_csv("input/preproc_tilt38_solstice_07_14.csv", index_label='time')

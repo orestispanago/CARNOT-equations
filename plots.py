@@ -100,6 +100,6 @@ def plot_calendar_heatmap(dfin, col, freq="1min", cbar_title="cbar_title", units
     ax.invert_yaxis()
     ax.tick_params(axis='y', which='major', pad=30)
     plt.xticks(rotation=0)
-    # plt.tight_layout()
-    # plt.savefig(f"{folder}/{col}.png")
+    plt.tight_layout()
+    plt.savefig(f"{folder}/{col}.png")
     plt.show()
