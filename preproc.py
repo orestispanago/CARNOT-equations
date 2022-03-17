@@ -32,4 +32,4 @@ solstice = solstice.resample('1min').mean()
 solstice = solstice.between_time("07:00", "14:00")
 absorber_dimensions = 0.25*0.25
 df['kdir_idir'] = solstice['absorbed_flux']
-df.to_csv("input/preproc_tilt38_solstice_07_14.csv", index_label='time')
+# df.to_csv("input/preproc_tilt38_solstice_07_14.csv", index_label='time')
