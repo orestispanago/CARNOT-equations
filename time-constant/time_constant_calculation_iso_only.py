@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 
 import sys
 sys.path.append('../')
+params = {
+           'savefig.dpi': 150,
+          }
+plt.rcParams.update(params)
 
 from lookup.iam import kdir
 
@@ -32,6 +36,7 @@ def plot_temperatures(iso):
     plt.ylabel("$(K)$")
     plt.xlabel("time (s)")
     plt.grid()
+    plt.savefig("temperatures.png")
     plt.show()
     
     
@@ -41,6 +46,7 @@ def plot_delta(iso):
     plt.ylabel("(K)")
     plt.title("$T_{out} - T_{in}$")
     plt.grid()
+    plt.savefig("delta_t.png")
     plt.show()
 
 
@@ -54,6 +60,7 @@ def plot_delta_fraction(iso_dec, tc, tc_dfrac, t95, t95_dfrac):
     plt.annotate(f"< 1/e ({tc}, {tc_dfrac:.3f})", (tc+1, tc_dfrac+0.1))
     plt.annotate(f"< 5% ({t95}, {t95_dfrac:.3f})", (t95+1, t95_dfrac+0.1))
     plt.grid()
+    plt.savefig("delta_frac.png")
     plt.show()
 
 def step_down(t, trigger_time):
