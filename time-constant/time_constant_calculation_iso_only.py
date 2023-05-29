@@ -2,11 +2,16 @@ import numpy as np
 import pandas as pd
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
-
+import os
 import sys
+
 sys.path.append('../')
 params = {
+        'lines.linewidth':3,
+    'font.size': 16,
+    'lines.markersize':7,
            'savefig.dpi': 150,
+           'figure.constrained_layout.use': True,
           }
 plt.rcParams.update(params)
 
@@ -26,6 +31,10 @@ idir_0 = 800        # initial solar radiation intensity (W/m2)
 trigger_time = 40   # time to trigger step down function (s)
 final_time = 60     # final simulation time (s)
 
+def mkdir_if_not_exists(dirname):
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
 
 def plot_temperatures(iso):
     iso["t_out"].plot(label="$T_{out}$")
@@ -36,7 +45,9 @@ def plot_temperatures(iso):
     plt.ylabel("$(K)$")
     plt.xlabel("time (s)")
     plt.grid()
-    plt.savefig("temperatures.png")
+    pic_path="plots/temperatures.png"
+    mkdir_if_not_exists(os.path.dirname(pic_path))
+    plt.savefig(pic_path)
     plt.show()
     
     
@@ -46,21 +57,26 @@ def plot_delta(iso):
     plt.ylabel("(K)")
     plt.title("$T_{out} - T_{in}$")
     plt.grid()
-    plt.savefig("delta_t.png")
+    pic_path="plots/delta_t.png"
+    mkdir_if_not_exists(os.path.dirname(pic_path))
+    plt.savefig(pic_path)
     plt.show()
 
 
 
 def plot_delta_fraction(iso_dec, tc, tc_dfrac, t95, t95_dfrac):
-    iso_dec["delta_t_frac"].plot()
-    plt.plot(tc, tc_dfrac, "o")
-    plt.plot(t95, t95_dfrac, "o")
+    iso_dec["delta_t_frac"].plot(label="")
+    plt.plot(tc, tc_dfrac, "o", label="< 1/e")
+    plt.plot(t95, t95_dfrac, "o", label="< 5%")
     plt.xlabel("time (s)")
     plt.title("$\Delta T / \Delta T_0$")
-    plt.annotate(f"< 1/e ({tc}, {tc_dfrac:.3f})", (tc+1, tc_dfrac+0.1))
-    plt.annotate(f"< 5% ({t95}, {t95_dfrac:.3f})", (t95+1, t95_dfrac+0.1))
+    # plt.annotate(f"< 1/e ({tc}, {tc_dfrac:.3f})", (tc+0.5, tc_dfrac+0.1))
+    # plt.annotate(f"< 5% ({t95}, {t95_dfrac:.3f})", (t95, t95_dfrac+0.1))
     plt.grid()
-    plt.savefig("delta_frac.png")
+    plt.legend()
+    pic_path="plots/delta_frac.png"
+    mkdir_if_not_exists(os.path.dirname(pic_path))
+    plt.savefig(pic_path)
     plt.show()
 
 def step_down(t, trigger_time):

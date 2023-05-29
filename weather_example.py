@@ -2,8 +2,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.integrate import odeint
+import os
 
 from lookup.iam import kdir
+
+
+
+params = {
+    'lines.linewidth':3,
+    'font.size': 16,
+           'savefig.dpi': 150,
+          }
+plt.rcParams.update(params)
 
 # CARNOT parameters
 area = 1        # collector surface  (m2)
@@ -18,7 +28,6 @@ t_in = 280          # water inlet temperature (K)
 cp = 4200           # water heat capacity (J/kg*K)
 final_time = 30     # final simulation time (s)
 
-
 def iso_equation(Tm, t):
     dTmdt = (F_ta*kdir(az, zen)*dni - c1 * (Tm - t_amb) -
              c2 * (Tm - t_amb)**2 - 2 * mdot*cp*(Tm - t_in)/area)/c5
@@ -29,6 +38,10 @@ def iso_equation_modified(Tout, t):
     dToutdt = (F_ta*kdir(az, zen)*dni - c1 * (Tout + t_in-2*t_amb) -
                c2 * (Tout + t_in - 2*t_amb)**2 -  mdot*cp*(Tout - t_in)/area)*2/c5
     return dToutdt
+
+def mkdir_if_not_exists(dirname):
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
 
 
 def plot_temps():
@@ -57,6 +70,9 @@ def plot_temps():
     plt.xlabel("time (s)")
 
     plt.tight_layout()
+    pic_path="plots/weather_example_temps.png"
+    mkdir_if_not_exists(os.path.dirname(pic_path))
+    plt.savefig(pic_path)
     plt.show()
 
 
@@ -64,7 +80,7 @@ def plot_power_eff():
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 3, 1)
     df_all_iso['irr'].plot(label='ISO')
-    plt.title("DNI")
+    plt.title("$DNI$")
     plt.ylabel("$(W \cdot m^{-2})$")
     plt.xlabel("time (s)")
 
@@ -72,7 +88,7 @@ def plot_power_eff():
     df_all_iso['qdot'].plot(label='ISO')
     # df_all_iso_mod['qdot'].plot(label='ISO mod')
     # plt.legend()
-    plt.title("$\dot Q$")
+    plt.title("$\dot{Q}$")
     plt.ylabel("$(W)$")
     plt.xlabel("time (s)")
 
@@ -80,11 +96,15 @@ def plot_power_eff():
     df_all_iso['eff'].plot(label='ISO')
     # df_all_iso_mod['eff'].plot(label='ISO mod')
     # plt.legend()
-    plt.title("Efficiency")
+    plt.title("$n$")
 
     plt.xlabel("time (s)")
     plt.tight_layout()
+    pic_path="plots/weather_example_power_eff.png"
+    mkdir_if_not_exists(os.path.dirname(pic_path))
+    plt.savefig(pic_path)
     plt.show()
+
 
 
 def calc_qdot(df):
